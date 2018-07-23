@@ -1,3 +1,3 @@
 # flipbit
 
-* Small util that flips a bit in a file
+Small util that flips a bit in a file.
