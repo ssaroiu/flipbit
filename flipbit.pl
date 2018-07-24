@@ -95,5 +95,5 @@ open my $fh, '+<', $file                    or die "open failed; $!\n";
 sysread($fh, $byteToFlip, 1, $B) == 1       or die "read failed: $!\n";
 $byteToFlip = $byteToFlip ^ chr(1 << $b);
 seek($fh, 0, 0);
-syswrite($fh, $byteToFlip)                  or die "write failed: $!\n";
+syswrite($fh, $byteToFlip) == 1             or die "write failed: $!\n";
 close $fh                                   or die "close failed: $!\n";
