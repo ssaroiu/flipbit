@@ -21,7 +21,7 @@ use Pod::Usage qw(pod2usage);
 
 =head1 SYNOPSIS
 
-    flipbit [-r -s] [-B <n> -b <n>] -f file
+    flipbit [-r -s <n>] [-b <n>] -f file
 
 =head1 OPTIONS
 
@@ -29,8 +29,7 @@ use Pod::Usage qw(pod2usage);
 
     -r           flip random bit
     -s           seed for the RNG when choosing the random bit
-    -B           index of byte where bit will be flipped (starting from 0)
-    -b           index of bit within byte to flip (0-7)
+    -b           index of bit to flip (starting from 0)
     -f           name of file where bit will be flipped
     -h           brief help
     -v           help, usage, and examples
@@ -40,16 +39,15 @@ use Pod::Usage qw(pod2usage);
   ./flipbit -r -f file
      flip one random bit in <file>
 
-  ./flipbit -B 1 -b 3 -f file
-     flip bit 11 (1 * 8 + 3) in <file>
+  ./flipbit -b 11 -f file
+     flip bit 11 in <file>
  
 =cut
 
 GetOptions(
     q(r)                => \my $r,
     q(seed=i)           => \my $s,
-    q(Byte=i)           => \my $B,
-    q(bit=i)            => \my $b,
+    q(bit=i)            => \my $bit,
     q(file=s)           => \my $file,
     q(help)             => \my $help,
     q(verbose)          => \my $verbose,
@@ -63,13 +61,8 @@ if (!defined $file) {
     pod2usage(q(-verbose) => 0);
 }
 
-# Byte and bit must either be both defined or both undefined
-if ((defined $B) ^ (defined $b)) {
-    pod2usage(1);
-}
-
-# If Byte (and bit) is undefined, r flag must be defined
-if (!(defined $B) && !(defined $r)) {
+# If bit is undefined, r flag must be defined
+if (!(defined $bit) && !(defined $r)) {
     pod2usage(1);
 }
 
@@ -79,13 +72,16 @@ if (!defined $s) {
 }
 srand($s);
 
-# If bit to flipped is random, pick a random byte and a random bit
+# If bit to flipped is random, pick a random bit
 my $fileSize = -1;
 if (defined $r) {
     $fileSize = -s $file;
-    $B = int(rand($fileSize));
-    $b = int(rand(8));
+    $bit = 8 * int(rand($fileSize)) + int(rand(8));
 }
+
+# From file manipulation, set $B as the byte offset and $b as the bit offset (0-7)
+my $B = $bit / 8;
+my $b = $bit % 8;
 
 my $byteToFlip;
 open my $fh, '+<', $file                    or die "open failed; $!\n";
