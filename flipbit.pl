@@ -92,9 +92,9 @@ seek($fh, $B, 0);
 sysread($fh, $byteToFlip, 1) == 1       or die "read failed: $!\n";
 
 # Unpack to char, flip bit, pack back to string
-my $number = unpack ("c", $byteToFlip);
+my $number = unpack ("C", $byteToFlip);
 $number = $number ^ (1 << $b);
-$byteToFlip = pack("c", $number);
+$byteToFlip = pack("C", $number);
 
 # Write the byte at location $B
 seek($fh, $B, 0);
