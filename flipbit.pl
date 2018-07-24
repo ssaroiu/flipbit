@@ -81,19 +81,25 @@ print $s, "\n";
 srand($s);
 
 # If bit to flipped is random, pick a random byte and a random bit
+my $fileSize = -1;
 if (defined $r) {
-    my $fileSize = -s $file;
+    $fileSize = -s $file;
     $B = int(rand($fileSize));
     $b = int(rand(8));
 }
 
+print $fileSize, "\n";
 print $B, "\n";
 print $b, "\n";
 
 my $byteToFlip;
 open my $fh, '+<', $file                    or die "open failed; $!\n";
-sysread($fh, $byteToFlip, 1, $B) == 1       or die "read failed: $!\n";
-#$byteToFlip = $byteToFlip ^ (1 << $b);
+binmode $fh;
+seek($fh, $B, 0);
+sysread($fh, $byteToFlip, 1) == 1       or die "read failed: $!\n";
+print "Length:", length($byteToFlip), "\n";
+$byteToFlip = $byteToFlip ^ (1 << $b);
+print "Length:", length($byteToFlip), "\n";
 seek($fh, $B, 0);
 syswrite($fh, $byteToFlip) == 1             or die "write failed: $!\n";
 close $fh                                   or die "close failed: $!\n";
