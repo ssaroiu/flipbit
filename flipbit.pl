@@ -77,7 +77,6 @@ if (!(defined $B) && !(defined $r)) {
 if (!defined $s) {
     $s = 0;
 }
-print $s, "\n";
 srand($s);
 
 # If bit to flipped is random, pick a random byte and a random bit
@@ -88,21 +87,20 @@ if (defined $r) {
     $b = int(rand(8));
 }
 
-print $fileSize, "\n";
-print $B, "\n";
-print $b, "\n";
-
 my $byteToFlip;
 open my $fh, '+<', $file                    or die "open failed; $!\n";
 binmode $fh;
+
+# Read the byte at location $B
 seek($fh, $B, 0);
 sysread($fh, $byteToFlip, 1) == 1       or die "read failed: $!\n";
-print "Length:", length($byteToFlip), "\n";
+
+# Unpack to char, flip bit, pack back to string
 my $number = unpack ("c", $byteToFlip);
-print $number, "\n";
 $number = $number ^ (1 << $b);
 $byteToFlip = pack("c", $number);
-print "Length:", length($byteToFlip), "\n";
+
+# Write the byte at location $B
 seek($fh, $B, 0);
 syswrite($fh, $byteToFlip) == 1             or die "write failed: $!\n";
 close $fh                                   or die "close failed: $!\n";
