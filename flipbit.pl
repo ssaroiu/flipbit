@@ -12,6 +12,7 @@ use autodie;
 use strict;
 use utf8;
 use warnings qw(all);
+use bytes;
 
 use Getopt::Long qw(:config no_ignore_case);
 use Pod::Usage qw(pod2usage);
@@ -20,13 +21,14 @@ use Pod::Usage qw(pod2usage);
 
 =head1 SYNOPSIS
 
-    flipbit [-r] [-B <n> -b <n>] [file]
+    flipbit [-r -s] [-B <n> -b <n>] [file]
 
 =head1 OPTIONS
 
     Options:
 
     -r           flip random bit
+    -s           seed for the RNG when choosing the random bit
     -B           index of byte where bit will be flipped (starting from 0)
     -b           index of bit within byte to flip (0-7)
     -h           brief help
@@ -44,6 +46,7 @@ use Pod::Usage qw(pod2usage);
 
 GetOptions(
     q(r)                => \my $r,
+    q(seed)             => \my $s,
     q(Byte=i)           => \my $B,
     q(bit=i)            => \my $b,
     q(help)             => \my $help,
@@ -64,10 +67,23 @@ if (!(defined $B) && !(defined $r)) {
     pod2usage(1);
 }
 
-# Actual code below
+# Set the seed if defined
+if (defined $s) {
+    srand($s);
+}
 
-my $file=<>; 
+open my $file, "<:raw", "$file";
 
-substr($file,$B,1) = substr($file,$B,1) ^ chr(1<<$b); 
+# if (defined $r) {
+#     my $fileSize = -s $file;
+#     my $offset = int(rand($fileSize));
+#     $B = int($offset  / 8);
+#     $b = $offset % 8;
+# #    print "$fileSize";
+#     die "done";
+# }
 
+#substr($file,$B,1) = substr($file,$B,1) ^ chr(1<<$b); 
+
+close $file;
 print $file;
